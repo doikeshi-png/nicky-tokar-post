@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>nicky tokar — Telegram Rich Post Builder</title>
+  <style>
+    :root{
+      --milk:#fbf5f0;
+      --milk2:#fffaf7;
+      --paper:#fffdfb;
+      --ink:#2a1c20;
+      --muted:#8a7378;
+      --burg:#7d243c;
+      --burg2:#a3405d;
+      --burg3:#c45d78;
+      --pink:#f7e6eb;
+      --line:#ead5d8;
+      --line2:#dcb6bf;
+      --ok:#116149;
+      --warn:#85500f;
+      --shadow:0 18px 44px rgba(88,33,48,.13);
+      --shadow2:0 10px 24px rgba(88,33,48,.08);
+      --radius:28px;
+      --radius2:18px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(circle at 12% 0%,#fff 0,#fff7f4 28%,#f8eeec 70%,#f7eeee 100%);font-family:Arial,Helvetica,sans-serif;color:var(--ink)}
+    .bg-orb{position:fixed;inset:auto auto 5% -150px;width:360px;height:360px;border-radius:50%;background:rgba(125,36,60,.08);filter:blur(20px);pointer-events:none}
+    .bg-orb.two{inset:6% -140px auto auto;background:rgba(196,93,120,.11)}
+    .wrap{max-width:1220px;margin:0 auto;padding:22px}
+    header{position:sticky;top:0;z-index:50;padding:10px 0 14px;background:linear-gradient(180deg,rgba(251,245,240,.96),rgba(251,245,240,.72));backdrop-filter:blur(16px)}
+    .brand{display:flex;align-items:center;justify-content:space-between;gap:18px;background:rgba(255,253,251,.76);border:1px solid var(--line);border-radius:30px;padding:12px 14px 12px 16px;box-shadow:var(--shadow2)}
+    .brand-left{display:flex;align-items:center;gap:14px}
+    .logo{width:62px;height:62px;object-fit:contain;filter:drop-shadow(0 8px 13px rgba(0,0,0,.12))}
+    .brand-title{font-size:30px;letter-spacing:.02em;font-weight:800;text-transform:lowercase;line-height:1}
+    .brand-sub{margin-top:4px;color:var(--muted);font-size:13px}
+    .quick{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    button,.chip{transition:transform .22s ease, box-shadow .22s ease, background .22s ease, border-color .22s ease, opacity .22s ease}
+    button{border:0;cursor:pointer;font-family:inherit}
+    .btn{border-radius:999px;padding:13px 18px;background:var(--burg);color:#fff;font-weight:800;font-size:15px;box-shadow:0 12px 22px rgba(125,36,60,.20)}
+    .btn:hover{transform:translateY(-2px);background:var(--burg2)}
+    .btn.soft{background:#fff;color:var(--burg);border:1px solid var(--line2);box-shadow:none}
+    .btn.soft:hover{background:var(--pink)}
+    .btn.ghost{background:var(--pink);color:var(--burg);box-shadow:none}
+    .btn.big{width:100%;font-size:18px;padding:17px 22px;border-radius:20px;margin-top:12px}
+    .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;margin-top:18px}
+    .card{background:rgba(255,253,251,.88);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .card-pad{padding:24px}
+    h1,h2,h3{margin:0;line-height:1.05}
+    h1{font-size:44px;letter-spacing:-.03em;max-width:720px}
+    h2{font-size:26px;margin-bottom:14px}
+    h3{font-size:17px;margin-bottom:10px}
+    .lead{font-size:18px;line-height:1.5;color:var(--muted);margin:14px 0 0;max-width:760px}
+    .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:22px}
+    .step{padding:13px;border:1px solid var(--line);border-radius:18px;background:#fff;color:var(--muted);font-size:13px;line-height:1.35}
+    .step b{display:block;color:var(--burg);font-size:18px;margin-bottom:2px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    label{display:block;font-weight:800;margin:0 0 7px;color:var(--ink);font-size:14px}
+    input,textarea,select{width:100%;border:1px solid var(--line);border-radius:16px;background:#fff;padding:13px 14px;font:15px/1.4 Arial,Helvetica,sans-serif;color:var(--ink);outline:none;transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease}
+    textarea{min-height:104px;resize:vertical}
+    input:focus,textarea:focus,select:focus{border-color:var(--burg2);box-shadow:0 0 0 5px rgba(125,36,60,.09)}
+    .field{margin-bottom:14px}
+    .hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.35}
+    .small-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:22px 0 12px}
+    .small-title span{font-size:12px;color:var(--muted)}
+    .format-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .chip{display:flex;align-items:center;gap:9px;border:1px solid var(--line);background:#fff;border-radius:18px;padding:13px;cursor:pointer;user-select:none;min-height:54px;font-weight:800;color:var(--ink)}
+    .chip:hover{border-color:var(--line2);transform:translateY(-1px);box-shadow:var(--shadow2)}
+    .chip input{width:auto;margin:0;accent-color:var(--burg)}
+    .chip.active{background:linear-gradient(180deg,#fff5f8,#f8e4ea);border-color:var(--burg3);color:var(--burg)}
+    .extra{display:none;animation:fadeSlide .32s ease both}
+    .extra.show{display:block}
+    @keyframes fadeSlide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .preview-wrap{display:grid;grid-template-columns:1fr;gap:14px}
+    .phone{background:#151015;border-radius:34px;padding:12px;box-shadow:0 26px 60px rgba(0,0,0,.22)}
+    .screen{background:#f6f1ed;border-radius:25px;min-height:460px;max-height:720px;overflow:auto;padding:16px}
+    .tg-post{background:#fff;border-radius:22px;padding:18px;box-shadow:0 8px 18px rgba(0,0,0,.05);line-height:1.45}
+    .tg-post h1{font-size:30px;margin-bottom:12px;color:#2a1c20;letter-spacing:-.02em}
+    .tg-post h2{font-size:22px;margin:18px 0 10px;color:#2a1c20}
+    .tg-post h3{font-size:18px;margin:16px 0 8px;color:#7d243c}
+    .tg-post p{margin:10px 0;white-space:pre-wrap}
+    .tg-post blockquote,.tg-post aside{margin:14px 0;padding:13px 14px;border-left:4px solid var(--burg2);background:#f9eef2;border-radius:14px;color:#452c33}
+    .tg-post mark{background:#ffe2eb;border-radius:6px;padding:1px 4px;color:#511629}
+    .tg-post details{margin:14px 0;padding:13px;border:1px solid var(--line);border-radius:16px;background:#fff9fa}
+    .tg-post summary{font-weight:800;color:var(--burg);cursor:pointer}
+    .tg-post table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+    .tg-post td,.tg-post th{border:1px solid var(--line);padding:8px;vertical-align:top}
+    .tg-post ul,.tg-post ol{padding-left:22px}
+    .tg-post footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:12px;margin-top:16px}
+    .media-placeholder{border:1px dashed var(--line2);border-radius:18px;background:#fff8fa;padding:16px;text-align:center;color:var(--muted);margin:14px 0;font-weight:700}
+    .codebox{display:none;background:#21171b;color:#fceef2;border-radius:20px;padding:16px;max-height:280px;overflow:auto;white-space:pre-wrap;word-break:break-word;font:13px/1.55 Consolas,monospace;animation:fadeSlide .3s ease both}
+    .codebox.show{display:block}
+    .status{font-size:13px;color:var(--muted);margin-top:10px;min-height:20px}
+    .publish-card{margin-top:18px;background:linear-gradient(135deg,#7d243c,#a3405d);color:#fff;border-radius:24px;padding:20px;box-shadow:var(--shadow)}
+    .publish-card h2{color:#fff;margin-bottom:8px}
+    .publish-card p{margin:0 0 12px;color:rgba(255,255,255,.82);font-size:14px;line-height:1.45}
+    .publish-card .btn{background:#fff;color:var(--burg);box-shadow:none}
+    .publish-card .btn:hover{background:#fff3f6}
+    .two-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#2a1c20;color:#fff;border-radius:999px;padding:12px 18px;font-weight:800;opacity:0;pointer-events:none;transition:.25s;z-index:999}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    .simple-note{font-size:13px;color:var(--muted);line-height:1.45;background:#fff7f8;border:1px solid var(--line);border-radius:18px;padding:14px}
+    @media(max-width:1000px){.hero{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}.format-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:680px){.wrap{padding:14px}.brand{align-items:flex-start}.brand-title{font-size:24px}.hero h1{font-size:34px}.form-grid,.steps,.format-grid,.two-buttons{grid-template-columns:1fr}.quick{width:100%;justify-content:flex-start}.logo{width:52px;height:52px}.card-pad{padding:18px}}
+  </style>
+</head>
+<body>
+  <div class="bg-orb"></div><div class="bg-orb two"></div>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="brand-left">
+          <img class="logo" src="./assets/images/logo-eye.png" alt="nicky tokar logo">
+          <div>
+            <div class="brand-title">nicky tokar</div>
+            <div class="brand-sub">простой конструктор rich-постов для Telegram</div>
+          </div>
+        </div>
+        <div class="quick">
+          <button class="btn soft" id="randomExample">Случайный пример</button>
+          <button class="btn soft" id="clearAll">Очистить</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="card card-pad">
+        <h1>Соберите пост без кода</h1>
+        <p class="lead">Заполните поля, выберите оформление и нажмите «Выложить в Telegram». HTML создаётся сам.</p>
+        <div class="steps">
+          <div class="step"><b>1</b>Токен бота</div>
+          <div class="step"><b>2</b>Канал</div>
+          <div class="step"><b>3</b>Текст поста</div>
+          <div class="step"><b>4</b>Оформление и публикация</div>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+        <h2>Публикация</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label for="token">Токен бота</label>
+            <input id="token" type="text" placeholder="123456789:AA...">
+            <div class="hint">Берётся в BotFather. На сайте не сохраняется.</div>
+          </div>
+          <div class="field">
+            <label for="chat">Название канала</label>
+            <input id="chat" type="text" placeholder="@channel_name">
+            <div class="hint">Бот должен быть админом канала.</div>
+          </div>
+        </div>
+        <button class="btn big" id="sendTop">Выложить пост в Telegram</button>
+        <div class="status" id="sendStatus"></div>
+      </div>
+    </section>
+
+    <section class="hero" style="align-items:start">
+      <div class="card card-pad">
+        <h2>Пост</h2>
+        <div class="field">
+          <label for="postTitle">Заголовок</label>
+          <input id="postTitle" type="text" placeholder="Напишите заголовок">
+        </div>
+        <div class="field">
+          <label for="postText">Основной текст</label>
+          <textarea id="postText" placeholder="Напишите текст поста. Можно обычными словами, без HTML."></textarea>
+        </div>
+
+        <div class="small-title"><h3>Плашки текста</h3><span>необязательно</span></div>
+        <div class="field">
+          <label for="badge1">Плашка 1</label>
+          <input id="badge1" type="text" placeholder="Коротная мысль, акцент или важная фраза">
+        </div>
+        <div class="field">
+          <label for="badge2">Плашка 2</label>
+          <input id="badge2" type="text" placeholder="Вторая важная фраза">
+        </div>
+        <div class="field">
+          <label for="badge3">Плашка 3</label>
+          <input id="badge3" type="text" placeholder="Третья важная фраза">
+        </div>
+
+        <div class="small-title"><h3>Выберите оформление</h3><span>можно несколько</span></div>
+        <div class="format-grid" id="formatGrid">
+          <label class="chip"><input type="checkbox" id="fmtBoldTitle" checked> Красивый заголовок</label>
+          <label class="chip"><input type="checkbox" id="fmtBadges" checked> Плашки</label>
+          <label class="chip"><input type="checkbox" id="fmtList"> Список</label>
+          <label class="chip"><input type="checkbox" id="fmtQuote"> Цитата</label>
+          <label class="chip"><input type="checkbox" id="fmtDetails"> Подробнее</label>
+          <label class="chip"><input type="checkbox" id="fmtTable"> Таблица</label>
+          <label class="chip"><input type="checkbox" id="fmtCarousel"> Карусель</label>
+          <label class="chip"><input type="checkbox" id="fmtCollage"> Коллаж</label>
+          <label class="chip"><input type="checkbox" id="fmtButton"> Кнопка</label>
+        </div>
+
+        <div class="extra" id="extraList">
+          <div class="small-title"><h3>Список</h3><span>каждый пункт с новой строки</span></div>
+          <textarea id="listText" placeholder="Пункт 1\nПункт 2\nПункт 3"></textarea>
+        </div>
+
+        <div class="extra" id="extraQuote">
+          <div class="small-title"><h3>Цитата</h3><span>выделенный блок</span></div>
+          <textarea id="quoteText" placeholder="Текст цитаты"></textarea>
+        </div>
+
+        <div class="extra" id="extraDetails">
+          <div class="small-title"><h3>Подробнее</h3><span>раскрывающийся блок</span></div>
+          <input id="detailsTitle" type="text" placeholder="Название блока, например: Подробнее">
+          <textarea id="detailsText" placeholder="Текст, который будет спрятан внутри блока" style="margin-top:10px"></textarea>
+        </div>
+
+        <div class="extra" id="extraTable">
+          <div class="small-title"><h3>Таблица</h3><span>ячейки через |</span></div>
+          <textarea id="tableText" placeholder="Колонка 1 | Колонка 2\nТекст 1 | Текст 2\nТекст 3 | Текст 4"></textarea>
+        </div>
+
+        <div class="extra" id="extraGallery">
+          <div class="small-title"><h3>Картинки / видео</h3><span>каждая ссылка с новой строки</span></div>
+          <textarea id="mediaLinks" placeholder="https://site.com/photo1.jpg\nhttps://site.com/photo2.jpg\nhttps://site.com/video.mp4"></textarea>
+          <div class="hint">Нужны прямые публичные HTTPS-ссылки на файл: .jpg, .png, .mp4.</div>
+        </div>
+
+        <div class="extra" id="extraButton">
+          <div class="small-title"><h3>Кнопка под постом</h3><span>необязательно</span></div>
+          <div class="form-grid">
+            <input id="buttonText" type="text" placeholder="Текст кнопки">
+            <input id="buttonUrl" type="text" placeholder="https://site.com">
+          </div>
+        </div>
+
+        <div class="publish-card">
+          <h2>Готово?</h2>
+          <p>Проверьте предпросмотр справа. Потом нажмите кнопку публикации.</p>
+          <button class="btn big" id="sendBottom">Выложить пост в Telegram</button>
+        </div>
+      </div>
+
+      <div class="preview-wrap">
+        <div class="card card-pad">
+          <h2>Как будет выглядеть</h2>
+          <div class="phone"><div class="screen"><div class="tg-post" id="preview"></div></div></div>
+          <div class="two-buttons" style="margin-top:12px">
+            <button class="btn soft" id="copyHtml">Скопировать HTML</button>
+            <button class="btn soft" id="toggleCode">Показать код</button>
+          </div>
+          <pre class="codebox" id="codeBox"></pre>
+        </div>
+        <div class="card card-pad">
+          <h2>Ответ Telegram</h2>
+          <div class="simple-note" id="apiResponse">После публикации здесь появится ответ API.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="toast" id="toast">Готово</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const fields = ['token','chat','postTitle','postText','badge1','badge2','badge3','listText','quoteText','detailsTitle','detailsText','tableText','mediaLinks','buttonText','buttonUrl'];
+const checks = ['fmtBoldTitle','fmtBadges','fmtList','fmtQuote','fmtDetails','fmtTable','fmtCarousel','fmtCollage','fmtButton'];
+
+function esc(s=''){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function attr(s=''){ return esc(s).replace(/'/g,'&apos;'); }
+function nl(s=''){ return esc(s).replace(/\n/g,'<br>'); }
+function toast(text){ const t=$('toast'); t.textContent=text; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); }
+function mediaTag(url){
+  const u = attr(url.trim());
+  if(!u) return '';
+  if(/\.(mp4|webm|mov|gif)(\?.*)?$/i.test(u)) return `<video src="${u}"></video>`;
+  return `<img src="${u}"/>`;
+}
+function makeTable(raw){
+  const rows = raw.split(/\n+/).map(r=>r.trim()).filter(Boolean);
+  if(!rows.length) return '';
+  const htmlRows = rows.map(row => {
+    const cells = row.split('|').map(c=>`<td>${esc(c.trim())}</td>`).join('');
+    return `<tr>${cells}</tr>`;
+  }).join('\n');
+  return `<table bordered>\n${htmlRows}\n</table>`;
+}
+function buildHtml(){
+  const out = [];
+  const title = $('postTitle').value.trim();
+  const text = $('postText').value.trim();
+  if(title){
+    out.push($('fmtBoldTitle').checked ? `<h1>${esc(title)}</h1>` : `<p><b>${esc(title)}</b></p>`);
+  }
+  if(text){ out.push(`<p>${nl(text)}</p>`); }
+
+  const badges = ['badge1','badge2','badge3'].map(id=>$(id).value.trim()).filter(Boolean);
+  if($('fmtBadges').checked && badges.length){
+    badges.forEach(b=>out.push(`<blockquote>${esc(b)}</blockquote>`));
+  }
+  if($('fmtList').checked){
+    const items = $('listText').value.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+    if(items.length) out.push(`<ul>\n${items.map(i=>`<li>${esc(i)}</li>`).join('\n')}\n</ul>`);
+  }
+  if($('fmtQuote').checked && $('quoteText').value.trim()){
+    out.push(`<aside>${nl($('quoteText').value.trim())}</aside>`);
+  }
+  if($('fmtTable').checked && $('tableText').value.trim()){
+    out.push(makeTable($('tableText').value.trim()));
+  }
+  const links = $('mediaLinks').value.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  if($('fmtCarousel').checked && links.length){
+    out.push(`<tg-slideshow>\n${links.map(u=>'  '+mediaTag(u)).join('\n')}\n  <figcaption>${links.length} слайда</figcaption>\n</tg-slideshow>`);
+  }
+  if($('fmtCollage').checked && links.length){
+    out.push(`<tg-collage>\n${links.map(u=>'  '+mediaTag(u)).join('\n')}\n</tg-collage>`);
+  }
+  if($('fmtDetails').checked){
+    const dt = $('detailsTitle').value.trim() || 'Подробнее';
+    const db = $('detailsText').value.trim();
+    if(db) out.push(`<details><summary>${esc(dt)}</summary><p>${nl(db)}</p></details>`);
+  }
+  out.push(`<footer>Создано в nicky tokar</footer>`);
+  return out.join('\n\n');
+}
+function buildReplyMarkup(){
+  if(!$('fmtButton').checked) return null;
+  const text = $('buttonText').value.trim();
+  const url = $('buttonUrl').value.trim();
+  if(!text || !url) return null;
+  return {inline_keyboard:[[{text, url}]]};
+}
+function renderPreview(){
+  const html = buildHtml();
+  const fake = html
+    .replace(/<tg-slideshow>[\s\S]*?<\/tg-slideshow>/g, '<div class="media-placeholder">Карусель: слайды будут листаться в Telegram</div>')
+    .replace(/<tg-collage>[\s\S]*?<\/tg-collage>/g, '<div class="media-placeholder">Коллаж: медиа будут показаны сеткой в Telegram</div>')
+    .replace(/<img[^>]*>/g, '<div class="media-placeholder">Изображение</div>')
+    .replace(/<video[^>]*>[\s\S]*?<\/video>/g, '<div class="media-placeholder">Видео</div>');
+  $('preview').innerHTML = fake || '<p style="color:#8a7378">Заполните поля слева — здесь появится предпросмотр.</p>';
+  $('codeBox').textContent = html;
+  document.querySelectorAll('.chip').forEach(chip=>{
+    const inp = chip.querySelector('input');
+    chip.classList.toggle('active', inp && inp.checked);
+  });
+  $('extraList').classList.toggle('show',$('fmtList').checked);
+  $('extraQuote').classList.toggle('show',$('fmtQuote').checked);
+  $('extraDetails').classList.toggle('show',$('fmtDetails').checked);
+  $('extraTable').classList.toggle('show',$('fmtTable').checked);
+  $('extraGallery').classList.toggle('show',$('fmtCarousel').checked || $('fmtCollage').checked);
+  $('extraButton').classList.toggle('show',$('fmtButton').checked);
+}
+function payload(){
+  const p = {
+    chat_id:$('chat').value.trim(),
+    rich_message:{html:buildHtml()},
+    reply_markup:buildReplyMarkup() || undefined
+  };
+  Object.keys(p).forEach(k=>p[k]===undefined&&delete p[k]);
+  return p;
+}
+async function sendPost(){
+  const token=$('token').value.trim();
+  const chat=$('chat').value.trim();
+  if(!token){ alert('Вставьте токен бота'); return; }
+  if(!chat){ alert('Вставьте название канала'); return; }
+  if(!buildHtml().trim()){ alert('Напишите пост'); return; }
+  $('sendStatus').textContent='Отправка...';
+  $('apiResponse').textContent='Отправка...';
+  try{
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendRichMessage`,{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload())
+    });
+    const data = await res.json();
+    $('sendStatus').textContent = data.ok ? 'Пост опубликован' : 'Telegram вернул ошибку';
+    $('apiResponse').textContent = JSON.stringify(data,null,2);
+  }catch(e){
+    $('sendStatus').textContent='Ошибка отправки';
+    $('apiResponse').textContent=String(e.message||e);
+  }
+}
+function setExample(){
+  const examples = [
+    {
+      title:'Большая новость недели',
+      text:'Сегодня запускаем новый формат публикаций. Теперь один пост может быть похож на мини-лендинг: с плашками, списком, таблицей, каруселью и кнопкой.',
+      b1:'Главная мысль: читателю должно быть понятно с первого экрана.',
+      b2:'Второй акцент: меньше шума, больше структуры.',
+      list:'Что изменилось\nКак это работает\nЧто сделать прямо сейчас',
+      quote:'Хороший пост не перегружает. Он ведёт читателя за руку.',
+      detailsTitle:'Что внутри',
+      details:'Можно добавить раскрывающийся блок с подробностями, чтобы не перегружать основной текст.',
+      table:'Блок | Для чего\nПлашка | Акцент\nКарусель | Визуальная история\nКнопка | Переход по ссылке',
+      btnText:'Открыть сайт', btnUrl:'https://example.com'
+    },
+    {
+      title:'Пять идей для сильного поста',
+      text:'Сначала напишите простую мысль. Потом добавьте оформление: заголовок, плашки, список и кнопку.',
+      b1:'Один пост — одна главная идея.',
+      b2:'Каждая плашка должна усиливать смысл.',
+      list:'Заголовок\nКороткое вступление\nТри главные мысли\nКнопка действия',
+      quote:'Чем проще интерфейс, тем чаще им пользуются.',
+      detailsTitle:'Подсказка',
+      details:'Если не знаете, что выбрать, оставьте только заголовок, плашки и кнопку.',
+      table:'Формат | Когда использовать\nСписок | Для шагов\nТаблица | Для сравнения\nПодробнее | Для длинных пояснений',
+      btnText:'Подробнее', btnUrl:'https://example.com'
+    }
+  ];
+  const ex = examples[Math.floor(Math.random()*examples.length)];
+  $('postTitle').value=ex.title; $('postText').value=ex.text; $('badge1').value=ex.b1; $('badge2').value=ex.b2; $('badge3').value='';
+  $('listText').value=ex.list; $('quoteText').value=ex.quote; $('detailsTitle').value=ex.detailsTitle; $('detailsText').value=ex.details;
+  $('tableText').value=ex.table; $('buttonText').value=ex.btnText; $('buttonUrl').value=ex.btnUrl;
+  ['fmtBoldTitle','fmtBadges','fmtList','fmtQuote','fmtDetails','fmtTable','fmtButton'].forEach(id=>$(id).checked=true);
+  ['fmtCarousel','fmtCollage'].forEach(id=>$(id).checked=false);
+  renderPreview(); toast('Пример вставлен');
+}
+fields.forEach(id=>$(id).addEventListener('input',renderPreview));
+checks.forEach(id=>$(id).addEventListener('change',renderPreview));
+$('sendTop').addEventListener('click',sendPost); $('sendBottom').addEventListener('click',sendPost);
+$('copyHtml').addEventListener('click',async()=>{await navigator.clipboard.writeText(buildHtml()); toast('HTML скопирован');});
+$('toggleCode').addEventListener('click',()=>{$('codeBox').classList.toggle('show'); $('toggleCode').textContent=$('codeBox').classList.contains('show')?'Скрыть код':'Показать код';});
+$('randomExample').addEventListener('click',setExample);
+$('clearAll').addEventListener('click',()=>{ if(!confirm('Очистить поля?')) return; fields.forEach(id=>{ if(!['token','chat'].includes(id)) $(id).value='';}); checks.forEach(id=>$(id).checked=['fmtBoldTitle','fmtBadges'].includes(id)); renderPreview(); });
+renderPreview();
+</script>
+</body>
+</html>
